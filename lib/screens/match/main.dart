@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:marcador_escopa/models/player.dart';
+import 'package:marcador_escopa/models/Player.dart';
 import 'package:marcador_escopa/screens/addPoints/main.dart';
 import 'package:marcador_escopa/utils/colors.dart';
+import 'package:marcador_escopa/widgets/table.dart';
 
 class Match extends StatefulWidget {
-  List<String> players = [];
+  final List<String> players;
+
   Match({Key key, this.players}) : super(key: key);
 
   @override
@@ -39,28 +41,60 @@ class _MatchState extends State<Match> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Ao sair você perderá os dados da partida !"),
+              content: Text("Deseja sair da partida ?"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Não"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                FlatButton(
+                  child: Text("Sim"),
+                  onPressed: () => Navigator.of(context).pop(true),
+                )
+              ],
+            )));
+  }
+
   @override
   Widget build(BuildContext context) {
     print(widget.players);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primary,
-        title: Text("Partida em andamento"),
-      ),
-      body: Container(
-          child: SizedBox.expand(
-        child: Wrap(
-          direction: Axis.horizontal,
-          alignment: WrapAlignment.spaceAround,
-          children: List.generate(
-              scoreboard.length, (index) => playerPoint(scoreboard[index])),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: primary,
+          title: Text("Partida em andamento"),
         ),
-      )),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: secondary,
-        icon: Icon(Icons.add),
-        label: Text("Marcar"),
-        onPressed: () => _navigateToScoreTable(),
+        body: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              children: <Widget>[
+                Wrap(
+                  direction: Axis.horizontal,
+                  alignment: WrapAlignment.spaceAround,
+                  spacing: 30.0,
+                  children: List.generate(scoreboard.length,
+                      (index) => playerPoint(scoreboard[index])),
+                ),
+                Ranking(
+                  players: scoreboard,
+                )
+              ],
+            ),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: secondary,
+          icon: Icon(Icons.add),
+          label: Text("Marcar"),
+          onPressed: () => _navigateToScoreTable(),
+        ),
       ),
     );
   }

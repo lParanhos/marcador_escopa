@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:marcador_escopa/models/player.dart';
+import 'package:marcador_escopa/models/Player.dart';
 import 'package:marcador_escopa/utils/colors.dart';
 
 enum ActionType { decrement, increment }
 enum TopicType { moreCards, moreGolds, scoredSeventy, escopas, goldPoints }
 
 class AddPoints extends StatefulWidget {
-  List<PlayerToScorePoints> players = [];
+  final List<PlayerToScorePoints> players;
+
   AddPoints({this.players});
 
   @override
@@ -20,13 +21,11 @@ class _AddPointsState extends State<AddPoints> {
   String whoHasMoreGoldCards = "";
   String whoHasSeventy = "";
 
-  List<Step> steps = [];
-  int count = 0;
-
   @override
   void initState() {
     super.initState();
     scorePoints.removeRange(0, scorePoints.length);
+
     setState(() {
       for (int i = 0; i < widget.players.length; i++) {
         PlayerToScorePoints p = new PlayerToScorePoints(widget.players[i].name);
@@ -37,6 +36,7 @@ class _AddPointsState extends State<AddPoints> {
 
   void handleUpdateEscopa(ActionType type, String name) {
     int index = scorePoints.indexWhere((element) => element.name == name);
+
     setState(() {
       if (type == ActionType.increment)
         scorePoints[index].escopas++;
@@ -47,6 +47,7 @@ class _AddPointsState extends State<AddPoints> {
 
   void handleUpdatePoints(ActionType type, String name) {
     int index = scorePoints.indexWhere((element) => element.name == name);
+
     setState(() {
       if (type == ActionType.increment)
         scorePoints[index].goldCards++;
@@ -81,7 +82,8 @@ class _AddPointsState extends State<AddPoints> {
           player.goldCards;
       score.add(player);
     }
-
+    //orderning the player to ascending order
+    score.sort((a, b) => -a.total.compareTo(b.total));
     Navigator.pop(context, score);
   }
 
