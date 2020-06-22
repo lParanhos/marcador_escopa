@@ -3,6 +3,8 @@ import 'package:marcador_escopa/models/Player.dart';
 import 'package:marcador_escopa/screens/addPoints/main.dart';
 import 'package:marcador_escopa/utils/colors.dart';
 import 'package:marcador_escopa/widgets/table.dart';
+import 'package:marcador_escopa/widgets/winnerDialog.dart';
+import 'package:marcador_escopa/widgets/winnersRank.dart';
 
 class Match extends StatefulWidget {
   final List<String> players;
@@ -15,6 +17,7 @@ class Match extends StatefulWidget {
 
 class _MatchState extends State<Match> {
   List<PlayerToScorePoints> scoreboard = [];
+  bool endMatch = false;
 
   @override
   void initState() {
@@ -34,11 +37,30 @@ class _MatchState extends State<Match> {
                   players: scoreboard,
                 ),
             fullscreenDialog: true));
+
     bool valid = result != null;
 
-    setState(() {
-      if (valid) scoreboard = result;
-    });
+    if (valid) {
+      dynamic hasWinner = result.where((player) => player.total >= 15);
+
+      if (hasWinner.isNotEmpty) {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) => WinnerDialog(
+            title: "Temos um vencedor ! ",
+            players: WinnersRank(
+              players: result,
+            ),
+            buttonText: "Ok",
+          ),
+        );
+      }
+      setState(() {
+        scoreboard = result;
+        if (hasWinner.isNotEmpty) endMatch = true;
+      });
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -84,17 +106,19 @@ class _MatchState extends State<Match> {
                 ),
                 Ranking(
                   players: scoreboard,
-                )
+                ),
               ],
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: secondary,
-          icon: Icon(Icons.add),
-          label: Text("Marcar"),
-          onPressed: () => _navigateToScoreTable(),
-        ),
+        floatingActionButton: endMatch
+            ? null
+            : FloatingActionButton.extended(
+                backgroundColor: secondary,
+                icon: Icon(Icons.add),
+                label: Text("Marcar"),
+                onPressed: () => _navigateToScoreTable(),
+              ),
       ),
     );
   }
