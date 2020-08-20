@@ -47,12 +47,16 @@ class _AddPointsState extends State<AddPoints> {
 
   void handleUpdatePoints(ActionType type, String name) {
     int index = scorePoints.indexWhere((element) => element.name == name);
-
+    print(scorePoints[index].escopas);
     setState(() {
-      if (type == ActionType.increment)
+      if (type == ActionType.increment) {
+        print("HEllo");
         scorePoints[index].goldCards++;
-      else if (type == ActionType.decrement && scorePoints[index].escopas > 0)
+      } else if (type == ActionType.decrement &&
+          scorePoints[index].goldCards > 0) {
         scorePoints[index].goldCards--;
+        print("decre");
+      }
     });
   }
 
